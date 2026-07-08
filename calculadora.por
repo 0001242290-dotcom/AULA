@@ -2,67 +2,85 @@ programa
 {
 	funcao inicio()
 	{
-		real num1, num2, resultado
+		inteiro num1, num2, resultado
 		cadeia operacao
+		cadeia continuar
 
-		escreva("Digite o primeiro valor: ")
-		leia(num1)
+		continuar = "S"
 
-		escreva("Digite a operacao (+, -, *, /): ")
-		leia(operacao)
+		enquanto (continuar == "S" ou continuar == "s")
+		{
+			escreva("===== CALCULADORA =====\n")
 
-		escreva("Digite o segundo valor: ")
-		leia(num2)
+			escreva("Digite o primeiro valor: ")
+			leia(num1)
 
-		se (operacao == "+")
-		{
-			resultado = soma(num1, num2)
-			escreva("Resultado: ", resultado)
-		}
-		senao se (operacao == "-")
-		{
-			resultado = sub(num1, num2)
-			escreva("Resultado: ", resultado)
-		}
-		senao se (operacao == "*")
-		{
-			resultado = mult(num1, num2)
-			escreva("Resultado: ", resultado)
-		}
-		senao se (operacao == "/")
-		{
-			se (num2 == 0)
+			escreva("Digite a operacao (+, -, *, /): ")
+			leia(operacao)
+
+			escreva("Digite o segundo valor: ")
+			leia(num2)
+
+			se (operacao == "+")
 			{
-				escreva("Erro! Divisao por zero.")
+				resultado = soma(num1, num2)
+				escreva(num1, " + ", num2, " = ", resultado, "\n")
+			}
+			senao se (operacao == "-")
+			{
+				resultado = subtracao(num1, num2)
+				escreva(num1, " - ", num2, " = ", resultado, "\n")
+			}
+			senao se (operacao == "*")
+			{
+				resultado = multiplicacao(num1, num2)
+				escreva(num1, " * ", num2, " = ", resultado, "\n")
+			}
+			senao se (operacao == "/")
+			{
+				se (num2 == 0)
+				{
+					escreva("Nao pode ser calculada!\n")
+				}
+				senao
+				{
+					resultado = divisao(num1, num2)
+					escreva(num1, " / ", num2, " = ", resultado, "\n")
+				}
 			}
 			senao
 			{
-				resultado = div(num1, num2)
-				escreva("Resultado: ", resultado)
+				escreva("Operacao invalida!\n")
 			}
+
+			escreva("\nDeseja usar a calculadora?\n")
+			escreva("S - Sim\n")
+			escreva("N - Nao\n")
+			leia(continuar)
+
+
+			escreva("\n")
 		}
-		senao
-		{
-			escreva("Operacao invalida!")
-		}
+
+		escreva("Calculadora encerrada.")
 	}
 
-	funcao real soma(real a, real b)
+	funcao inteiro soma(inteiro a, inteiro b)
 	{
 		retorne a + b
 	}
 
-	funcao real sub(real a, real b)
+	funcao inteiro subtracao(inteiro a, inteiro b)
 	{
 		retorne a - b
 	}
 
-	funcao real mult(real a, real b)
+	funcao inteiro multiplicacao(inteiro a, inteiro b)
 	{
 		retorne a * b
 	}
 
-	funcao real div(real a, real b)
+	funcao inteiro divisao(inteiro a, inteiro b)
 	{
 		retorne a / b
 	}
@@ -72,7 +90,7 @@ programa
  * Esta seção do arquivo guarda informações do Portugol Studio.
  * Você pode apagá-la se estiver utilizando outro editor.
  * 
- * @POSICAO-CURSOR = 1031; 
+ * @POSICAO-CURSOR = 1523; 
  * @PONTOS-DE-PARADA = ;
  * @SIMBOLOS-INSPECIONADOS = ;
  * @FILTRO-ARVORE-TIPOS-DE-DADO = inteiro, real, logico, cadeia, caracter, vazio;
