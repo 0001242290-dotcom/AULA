@@ -1,0 +1,201 @@
+programa
+{
+	inclua biblioteca Matematica --> mat
+	inclua biblioteca Texto --> txt
+	inclua biblioteca Tipos --> tip
+	
+	funcao inicio()
+	{
+		// ---- DECLARAÇÃO DE VARIÁVEIS  ----
+		inteiro totalDeComputadores, diasDeUsoNoMes, qtdComputadoresGastoAlto, horasDeUsoDiario
+		real precoPorKwh, potenciaEmWatts, consumoKwhDoPc, consumoTotalDoLab
+		real mediaConsumoPorPc, custoFinanceiroMensal, porcentagemDeGastoAlto, maiorConsumoRegistrado
+		cadeia nomeDoPc, categoriaDeConsumo, conselhoDiagnostico, nomeDoPcMaisGastao
+		
+		// VARIÁVEIS AMBIENTAIS E PROJEÇÕES
+		real custoFinanceiroAnual, consumoAnualProjetado
+		real co2MensalEmKg, co2AnualEmKg
+		real metaEconomiaKwh, metaEconomiaDinheiro
+		real fatorPoluicaoCO2 = 0.0927 // kg de CO2 por kWh gerado no Brasil
+		real arvoresNecessariasNoAno 
+
+		// Variável auxiliar para ler o teclado aceitando ponto ou vírgula
+		cadeia tarifaDigitadaNoTeclado
+
+		// ---- 1. ENTRADA DE DADOS E VALIDAÇÕES ----
+		escreva("=======================================================\n")
+		escreva("        ECOLAB v3.0 - AUDITORIA ENERGÉTICA SIMPLIFICADA \n")
+		escreva("=======================================================\n\n")
+		
+		escreva("Digite a quantidade de computadores: ")
+		leia(totalDeComputadores)
+		enquanto (totalDeComputadores <= 0) 
+		{
+			escreva("[ERRO] Digite um valor maior que zero: ")
+			leia(totalDeComputadores)
+		}
+
+		// TRATAMENTO DO PREÇO DO KWH (Aceita ponto ou vírgula)
+		precoPorKwh = -1.0
+		enquanto (precoPorKwh <= 0.0)
+		{
+			escreva("Digite o valor da tarifa de energia por kWh (R$) [Ex: 0,83]: ")
+			leia(tarifaDigitadaNoTeclado)
+
+			// Se o usuário digitou com vírgula, o programa substitui por ponto para não travar
+			inteiro posicaoDaVirgula = txt.posicao_texto(",", tarifaDigitadaNoTeclado, 0)
+			se (posicaoDaVirgula != -1)
+			{
+				tarifaDigitadaNoTeclado = txt.substituir(tarifaDigitadaNoTeclado, ",", ".")
+			}
+
+			// Verifica se o texto digitado é um número real válido e faz a conversão
+			se (tip.cadeia_e_real(tarifaDigitadaNoTeclado))
+			{
+				precoPorKwh = tip.cadeia_para_real(tarifaDigitadaNoTeclado)
+			}
+			senao
+			{
+				precoPorKwh = -1.0 
+			}
+
+			se (precoPorKwh <= 0.0)
+			{
+				escreva("[ERRO] Valor inválido! Digite um número positivo.\n")
+			}
+		}
+
+		// ---- INICIALIZAÇÃO DE ACUMULADORES (Zerar as caixas de contagem) ----
+		consumoTotalDoLab = 0.0
+		maiorConsumoRegistrado = -1.0  
+		qtdComputadoresGastoAlto = 0
+		nomeDoPcMaisGastao = ""
+
+		// ---- 2. CADASTRO INDIVIDUAL DOS COMPUTADORES ----
+		para (inteiro contador = 1; contador <= totalDeComputadores; contador++) 
+		{
+			escreva("\n-------------------------------------------------------\n")
+			escreva("   Cadastro do Computador: ", contador, " de ", totalDeComputadores, "\n")
+			escreva("-------------------------------------------------------\n")
+			
+			escreva("Identificação (ex: PC01): ")
+			leia(nomeDoPc)
+
+			escreva("Potência do equipamento (Watts): ")
+			leia(potenciaEmWatts)
+			enquanto (potenciaEmWatts <= 0.0)
+			{
+				escreva("[ERRO] Potência inválida! Digite um valor maior que zero: ")
+				leia(potenciaEmWatts)
+			}
+
+			escreva("Tempo de uso diário (Horas inteiras, de 0 a 24): ")
+			leia(horasDeUsoDiario)
+			enquanto (horasDeUsoDiario < 0 ou horasDeUsoDiario > 24) 
+			{
+				escreva("[ERRO] Valor incorreto! Digite de 0 a 24: ")
+				leia(horasDeUsoDiario)
+			}
+
+			escreva("Dias de uso no mês (1 a 31): ")
+			leia(diasDeUsoNoMes)
+			enquanto (diasDeUsoNoMes < 1 ou diasDeUsoNoMes > 31) 
+			{
+				escreva("[ERRO] Valor incorreto! Digite de 1 a 31: ")
+				leia(diasDeUsoNoMes)
+			}
+
+			// ---- CÁLCULOS DO COMPUTADOR ATUAL ----
+			consumoKwhDoPc = (potenciaEmWatts * horasDeUsoDiario * diasDeUsoNoMes) / 1000.0
+			consumoKwhDoPc = mat.arredondar(consumoKwhDoPc, 2)
+
+			// Classifica se o computador gasta pouco, médio ou muito
+			se (consumoKwhDoPc <= 20.0) 
+			{
+				categoriaDeConsumo = "Baixo"
+			} 
+			senao se (consumoKwhDoPc <= 40.0) 
+			{
+				categoriaDeConsumo = "Moderado"
+			} 
+			senao 
+			{
+				categoriaDeConsumo = "Elevado"
+				qtdComputadoresGastoAlto = qtdComputadoresGastoAlto + 1
+			}
+
+			// Soma o gasto deste PC ao total acumulado do laboratório
+			consumoTotalDoLab = consumoTotalDoLab + consumoKwhDoPc
+
+			// Testa se este computador é o novo campeão de desperdício
+			se (consumoKwhDoPc > maiorConsumoRegistrado) 
+			{
+				maiorConsumoRegistrado = consumoKwhDoPc
+				nomeDoPcMaisGastao = nomeDoPc
+			}
+
+			escreva("\n>> PC cadastrado! Consumo: ", consumoKwhDoPc, " kWh [Classificação: ", categoriaDeConsumo, "]\n")
+		}
+
+		// ---- 3. CÁLCULO DOS INDICADORES FINANCEIROS E AMBIENTAIS ----
+		mediaConsumoPorPc = mat.arredondar((consumoTotalDoLab / totalDeComputadores), 2)
+		custoFinanceiroMensal = mat.arredondar((consumoTotalDoLab * precoPorKwh), 2)
+		porcentagemDeGastoAlto = mat.arredondar(((qtdComputadoresGastoAlto * 100.0) / totalDeComputadores), 1)
+
+		// Cálculos de Emissão de Gases e Impacto ESG
+		co2MensalEmKg = mat.arredondar((consumoTotalDoLab * fatorPoluicaoCO2), 2)
+		co2AnualEmKg = mat.arredondar((co2MensalEmKg * 12.0), 2)
+		arvoresNecessariasNoAno = mat.arredondar((co2AnualEmKg / 22.0), 1) // 1 árvore média absorve ~22kg de CO2 por ano
+
+		// Projeções para 1 ano
+		consumoAnualProjetado = mat.arredondar((consumoTotalDoLab * 12.0), 2)
+		custoFinanceiroAnual = mat.arredondar((custoFinanceiroMensal * 12.0), 2)
+
+		// Metas (Garantindo a redução sugerida de 15%)
+		metaEconomiaKwh = mat.arredondar((consumoTotalDoLab * 0.15), 2)
+		metaEconomiaDinheiro = mat.arredondar((custoFinanceiroMensal * 0.15), 2)
+
+		// Gera o texto do diagnóstico com base no percentual de máquinas problemáticas
+		se (qtdComputadoresGastoAlto == 0) 
+		{
+			conselhoDiagnostico = "Excelente! Consumo geral dentro dos parâmetros verdes."
+		} 
+		senao se (porcentagemDeGastoAlto <= 30.0) 
+		{
+			conselhoDiagnostico = "Atenção: Recomenda-se ajustar o plano de energia das máquinas elevadas."
+		} 
+		senao 
+		{
+			conselhoDiagnostico = "CRÍTICO: Alto índice de desperdício! Emita uma auditoria física urgente."
+		}
+
+		// ---- 4. EMISSÃO DO RELATÓRIO TÉCNICO FINAL ----
+		escreva("\n\n=======================================================\n")
+		escreva("            RELATÓRIO TÉCNICO DE AUDITORIA             \n")
+		escreva("=======================================================\n")
+		escreva(" QUANTIDADE DE ATIVOS: ", totalDeComputadores, " computadores\n")
+		escreva(" TARIFA APLICADA: R$ ", precoPorKwh, " por kWh\n")
+		escreva("-------------------------------------------------------\n")
+		escreva(" >> CONSUMO MENSAL TOTAL: ", consumoTotalDoLab, " kWh\n")
+		escreva(" >> CONSUMO MÉDIO INDIVIDUAL: ", mediaConsumoPorPc, " kWh\n")
+		escreva(" >> GASTO FINANCEIRO MENSAL: R$ ", custoFinanceiroMensal, "\n")
+		escreva("-------------------------------------------------------\n")
+		escreva(" >> PROJEÇÃO CONSUMO ANUAL: ", consumoAnualProjetado, " kWh\n")
+		escreva(" >> PROJEÇÃO CUSTO ANUAL: R$ ", custoFinanceiroAnual, "\n")
+		escreva("-------------------------------------------------------\n")
+		escreva(" >> MÁQUINA VILÃ (MAIOR GASTO): ", nomeDoPcMaisGastao, " (", maiorConsumoRegistrado, " kWh)\n")
+		escreva(" >> MÁQUINAS COM CONSUMO ELEVADO: ", qtdComputadoresGastoAlto, " (", porcentagemDeGastoAlto, "% do Lab)\n")
+		escreva("-------------------------------------------------------\n")
+		escreva("               PEGADA ECOLÓGICA E CO2                  \n")
+		escreva(" >> ESTIMATIVA MENSAL DE EMISSÃO: ", co2MensalEmKg, " kg/CO2\n")
+		escreva(" >> ESTIMATIVA ANUAL DE EMISSÃO: ", co2AnualEmKg, " kg/CO2\n")
+		escreva(" >> ÁRVORES NECESSÁRIAS: ", arvoresNecessariasNoAno, " árvore(s) por ano\n")
+		escreva("-------------------------------------------------------\n")
+		escreva("         PLANO DE METAS (REDUÇÃO SUGERIDA DE 15%)      \n")
+		escreva(" >> META DE ECONOMIA DE ENERGIA: Economizar ", metaEconomiaKwh, " kWh/mês\n")
+		escreva(" >> META DE ECONOMIA FINANCEIRA: Poupar R$ ", metaEconomiaDinheiro, "/mês\n")
+		escreva("-------------------------------------------------------\n")
+		escreva(" DIAGNÓSTICO FINAL:\n ", conselhoDiagnostico, "\n")
+		escreva("=======================================================\n")
+	}
+}
